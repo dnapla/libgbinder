@@ -1,8 +1,80 @@
-libgbinder (1.0.41+0gemian1) xenial; urgency=medium
+libgbinder (1.1.3+gemian) unstable; urgency=medium
 
-  * Import to Gemian
+  * Branch for Gemian
 
- -- TheKit <thekit@disroot.org>  Thu, 23 Apr 2020 21:04:45 +0100
+ -- Adam Boardman <adamboardman@gmail.com>  Mon, 4 Jan 2021 22:45:00 +0000
+
+libgbinder (1.1.3) unstable; urgency=low
+
+  * Improved unit test coverage
+
+ -- Slava Monich <slava.monich@jolla.com>  Wed, 23 Dec 2020 21:48:27 +0200
+
+libgbinder (1.1.2) unstable; urgency=low
+
+  * Fixed random unit text failures
+
+ -- Slava Monich <slava.monich@jolla.com>  Wed, 23 Dec 2020 12:39:22 +0200
+
+libgbinder (1.1.1) unstable; urgency=low
+
+  * Handle corner cases for abandoned loopers
+  * Pass 0x0f priority to aidl2 service list request.
+  * Improved binder simulation for unit tests
+  * Added servicemanager_aidl unit test
+
+ -- Slava Monich <slava.monich@jolla.com>  Tue, 22 Dec 2020 15:15:10 +0200
+
+libgbinder (1.1.0) unstable; urgency=low
+
+  * Made RPC protocol configurable per binder device
+  * Made service managers configurable per binder device
+  * Added support for multiple config files
+  * Added "aidl2" variant of service manager
+  * Added "aidl2" variant of RPC protocol
+  * Added support for API level presets
+
+ -- Slava Monich <slava.monich@jolla.com>  Fri, 04 Dec 2020 13:47:26 +0200
+
+libgbinder (1.0.47) unstable; urgency=low
+
+  * Make library executable on RPM based systems
+
+ -- Slava Monich <slava.monich@jolla.com>  Sat, 19 Sep 2020 20:14:20 +0300
+
+libgbinder (1.0.46) unstable; urgency=low
+
+  * Make sure we drop fds that are going to be closed
+  * Better diagnostics for polling failures
+  * Package binder-list and binder-ping utilities
+
+ -- Slava Monich <slava.monich@jolla.com>  Fri, 31 Jul 2020 02:04:38 +0300
+
+libgbinder (1.0.45) unstable; urgency=low
+
+  * Always provide data buffer for hidl vector
+
+ -- Slava Monich <slava.monich@jolla.com>  Mon, 27 Jul 2020 23:19:25 +0300
+
+libgbinder (1.0.44) unstable; urgency=low
+
+  * Never drop valid incoming transactions
+
+ -- Slava Monich <slava.monich@jolla.com>  Mon, 29 Jun 2020 17:05:22 +0300
+
+libgbinder (1.0.43) unstable; urgency=low
+
+  * Hide internal symbols
+  * Respect arch specific lib dir
+  * Allow strip command to be replaced via environment variable
+
+ -- Slava Monich <slava.monich@jolla.com>  Wed, 03 Jun 2020 15:15:40 +0300
+
+libgbinder (1.0.42) unstable; urgency=low
+
+  * Allow GBinderClient to use multiple interfaces
+
+ -- Slava Monich <slava.monich@jolla.com>  Tue, 05 May 2020 19:56:39 +0300
 
 libgbinder (1.0.41) unstable; urgency=low
 

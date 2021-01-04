@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2018-2019 Jolla Ltd.
- * Copyright (C) 2018-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2018-2020 Jolla Ltd.
+ * Copyright (C) 2018-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -109,8 +109,8 @@ void
 test_basic(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
-    GBinderIpc* ipc2 = gbinder_ipc_new(GBINDER_DEFAULT_HWBINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
+    GBinderIpc* ipc2 = gbinder_ipc_new(GBINDER_DEFAULT_HWBINDER);
 
     g_assert(ipc);
     g_assert(ipc2);
@@ -119,16 +119,17 @@ test_basic(
     gbinder_ipc_unref(ipc2);
 
     /* Second gbinder_ipc_new returns the same (default) object */
-    g_assert(gbinder_ipc_new(NULL, NULL) == ipc);
-    g_assert(gbinder_ipc_new("", NULL) == ipc);
+    g_assert(gbinder_ipc_new(NULL) == ipc);
+    g_assert(gbinder_ipc_new("") == ipc);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_unref(ipc);
 
     /* Invalid path */
-    g_assert(!gbinder_ipc_new("invalid path", NULL));
+    g_assert(!gbinder_ipc_new("invalid path"));
 
     gbinder_ipc_exit();
+    test_binder_exit_wait();
 }
 
 /*==========================================================================*
@@ -153,7 +154,7 @@ void
 test_async_oneway(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -180,7 +181,7 @@ void
 test_sync_oneway(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -191,6 +192,7 @@ test_sync_oneway(
     gbinder_local_request_unref(req);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
 }
 
 /*==========================================================================*
@@ -202,7 +204,7 @@ void
 test_sync_reply_ok_status(
     int* status)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -235,6 +237,7 @@ test_sync_reply_ok_status(
     gbinder_local_reply_unref(reply);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
 }
 
 static
@@ -258,7 +261,7 @@ void
 test_sync_reply_error(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -278,6 +281,7 @@ test_sync_reply_error(
     gbinder_local_request_unref(req);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
 }
 
 /*==========================================================================*
@@ -316,7 +320,7 @@ void
 test_transact_ok(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -348,6 +352,7 @@ test_transact_ok(
     gbinder_local_reply_unref(reply);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -374,7 +379,7 @@ void
 test_transact_dead(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -395,6 +400,7 @@ test_transact_dead(
     gbinder_local_request_unref(req);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -421,7 +427,7 @@ void
 test_transact_failed(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -442,6 +448,7 @@ test_transact_failed(
     gbinder_local_request_unref(req);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -470,7 +477,7 @@ void
 test_transact_status(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
@@ -491,6 +498,7 @@ test_transact_status(
     gbinder_local_request_unref(req);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -512,7 +520,7 @@ void
 test_transact_custom(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
     gulong id = gbinder_ipc_transact_custom(ipc, NULL,
         test_transact_custom_done, NULL, loop);
@@ -523,6 +531,7 @@ test_transact_custom(
     gbinder_ipc_exit();
     gbinder_ipc_unref(ipc);
     g_main_loop_unref(loop);
+    test_binder_exit_wait();
 }
 
 /*==========================================================================*
@@ -543,7 +552,7 @@ void
 test_transact_custom2(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
     gulong id = gbinder_ipc_transact_custom(ipc, NULL, NULL,
         test_transact_custom_destroy, loop);
@@ -554,6 +563,7 @@ test_transact_custom2(
     gbinder_ipc_exit();
     gbinder_ipc_unref(ipc);
     g_main_loop_unref(loop);
+    test_binder_exit_wait();
 }
 
 /*==========================================================================*
@@ -575,7 +585,7 @@ void
 test_transact_custom3(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
     /* Reusing test_transact_cancel_done and test_transact_cancel_destroy */
     gulong id = gbinder_ipc_transact_custom(ipc, test_transact_custom3_exec,
@@ -586,6 +596,7 @@ test_transact_custom3(
 
     /* Reference to GBinderIpc is released by test_transact_custom3_exec */
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -624,7 +635,7 @@ void
 test_transact_cancel(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
     gulong id = gbinder_ipc_transact_custom(ipc, test_transact_cancel_exec,
         test_transact_cancel_done, test_transact_cancel_destroy, loop);
@@ -635,6 +646,7 @@ test_transact_cancel(
 
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -669,7 +681,7 @@ void
 test_transact_cancel2(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
     /* Reusing test_transact_cancel_done and test_transact_cancel_destroy */
     gulong id = gbinder_ipc_transact_custom(ipc, test_transact_cancel2_exec,
@@ -680,7 +692,97 @@ test_transact_cancel2(
 
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
+}
+
+/*==========================================================================*
+ * transact_2way
+ *==========================================================================*/
+
+static
+GBinderLocalReply*
+test_transact_2way_incoming_proc(
+    GBinderLocalObject* obj,
+    GBinderRemoteRequest* req,
+    guint code,
+    guint flags,
+    int* status,
+    void* user_data)
+{
+    int* incoming_call = user_data;
+
+    GVERBOSE_("\"%s\" %u", gbinder_remote_request_interface(req), code);
+    g_assert_cmpuint(flags, == ,0);
+    g_assert_cmpint(gbinder_remote_request_sender_pid(req), == ,getpid());
+    g_assert_cmpint(gbinder_remote_request_sender_euid(req), == ,geteuid());
+    g_assert_cmpstr(gbinder_remote_request_interface(req), == ,"test");
+    g_assert_cmpstr(gbinder_remote_request_read_string8(req), == ,"message");
+    g_assert_cmpuint(code, == ,2);
+    g_assert_cmpint(*incoming_call, == ,0);
+    (*incoming_call)++;
+
+    *status = GBINDER_STATUS_OK;
+    return gbinder_local_object_new_reply(obj);
+}
+
+static
+void
+test_transact_2way(
+    void)
+{
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
+    const GBinderIo* io = gbinder_driver_io(ipc->driver);
+    const int fd = gbinder_driver_fd(ipc->driver);
+    const char* dev = gbinder_driver_dev(ipc->driver);
+    const GBinderRpcProtocol* prot = gbinder_rpc_protocol_for_device(dev);
+    const char* const ifaces[] = { "test", NULL };
+    const guint32 handle = 0;
+    const guint32 code = 1;
+    int incoming_call = 0;
+    GMainLoop* loop = g_main_loop_new(NULL, FALSE);
+    GBinderLocalObject* obj = gbinder_local_object_new
+        (ipc, ifaces, test_transact_2way_incoming_proc, &incoming_call);
+    GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
+    GBinderLocalRequest* incoming_req = gbinder_local_request_new(io, NULL);
+    GBinderLocalReply* reply = gbinder_local_reply_new(io);
+    GBinderWriter writer;
+
+    /* Prepare reply */
+    g_assert(gbinder_local_reply_append_string16(reply, TEST_REQ_PARAM_STR));
+
+    /* Prepare incoming request */
+    gbinder_local_request_init_writer(req, &writer);
+    prot->write_rpc_header(&writer, "test");
+    gbinder_writer_append_string8(&writer, "message");
+
+    test_binder_br_transaction(fd, obj, 2,
+        gbinder_local_request_data(req)->bytes);
+    test_binder_br_noop(fd);
+    test_binder_br_transaction_complete(fd);
+    test_binder_br_noop(fd);
+    test_binder_br_reply(fd, handle, code,
+        gbinder_local_reply_data(reply)->bytes);
+
+    /* NB. Reusing test_transact_ok_done and test_transact_ok_destroy */
+    g_assert(gbinder_ipc_transact(ipc, handle, code, 0, req,
+        test_transact_ok_done, test_transact_ok_destroy, loop));
+
+    test_run(&test_opt, loop);
+
+    /* Now we need to wait until GBinderIpc is destroyed */
+    GDEBUG("waiting for GBinderIpc to get destroyed");
+    g_object_weak_ref(G_OBJECT(ipc), test_quit_when_destroyed, loop);
+    gbinder_local_object_unref(obj);
+    gbinder_local_request_unref(req);
+    gbinder_local_request_unref(incoming_req);
+    gbinder_local_reply_unref(reply);
+    g_idle_add(test_unref_ipc, ipc);
+    test_run(&test_opt, loop);
+
+    gbinder_ipc_exit();
+    g_main_loop_unref(loop);
+    test_binder_exit_wait();
 }
 
 /*==========================================================================*
@@ -715,7 +817,7 @@ void
 test_transact_incoming(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     const char* dev = gbinder_driver_dev(ipc->driver);
@@ -724,16 +826,21 @@ test_transact_incoming(
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
     GBinderLocalObject* obj = gbinder_local_object_new
         (ipc, ifaces, test_transact_incoming_proc, loop);
+    GBinderLocalRequest* ping = gbinder_local_request_new(io, NULL);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
-    GBinderOutputData* data;
     GBinderWriter writer;
+
+    gbinder_local_request_init_writer(ping, &writer);
+    prot->write_ping(&writer);
 
     gbinder_local_request_init_writer(req, &writer);
     prot->write_rpc_header(&writer, "test");
     gbinder_writer_append_string8(&writer, "message");
-    data = gbinder_local_request_data(req);
 
-    test_binder_br_transaction(fd, obj, 1, data->bytes);
+    test_binder_br_transaction(fd, obj, prot->ping_tx,
+        gbinder_local_request_data(ping)->bytes);
+    test_binder_br_transaction(fd, obj, 1,
+        gbinder_local_request_data(req)->bytes);
     test_binder_set_looper_enabled(fd, TRUE);
     test_run(&test_opt, loop);
 
@@ -741,11 +848,13 @@ test_transact_incoming(
     GDEBUG("waiting for GBinderIpc to get destroyed");
     g_object_weak_ref(G_OBJECT(ipc), test_quit_when_destroyed, loop);
     gbinder_local_object_unref(obj);
+    gbinder_local_request_unref(ping);
     gbinder_local_request_unref(req);
     g_idle_add(test_unref_ipc, ipc);
     test_run(&test_opt, loop);
 
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -779,7 +888,7 @@ void
 test_transact_status_reply(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     const char* dev = gbinder_driver_dev(ipc->driver);
@@ -810,6 +919,7 @@ test_transact_status_reply(
     test_run(&test_opt, loop);
 
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -886,7 +996,7 @@ void
 test_transact_async(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     const char* dev = gbinder_driver_dev(ipc->driver);
@@ -917,6 +1027,7 @@ test_transact_async(
     test_run(&test_opt, loop);
 
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -959,7 +1070,7 @@ void
 test_transact_async_sync(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     const int fd = gbinder_driver_fd(ipc->driver);
     const char* dev = gbinder_driver_dev(ipc->driver);
@@ -990,6 +1101,7 @@ test_transact_async_sync(
     test_run(&test_opt, loop);
 
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -1013,7 +1125,7 @@ void
 test_drop_remote_refs(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     GBinderLocalObject* obj = gbinder_local_object_new
         (ipc, NULL, NULL, NULL);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
@@ -1032,6 +1144,7 @@ test_drop_remote_refs(
     /* gbinder_ipc_exit will drop the remote reference */
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -1055,7 +1168,7 @@ void
 test_cancel_on_exit(
     void)
 {
-    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER, NULL);
+    GBinderIpc* ipc = gbinder_ipc_new(GBINDER_DEFAULT_BINDER);
     const GBinderIo* io = gbinder_driver_io(ipc->driver);
     GBinderLocalRequest* req = gbinder_local_request_new(io, NULL);
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);
@@ -1069,6 +1182,7 @@ test_cancel_on_exit(
     gbinder_local_request_unref(req);
     gbinder_ipc_unref(ipc);
     gbinder_ipc_exit();
+    test_binder_exit_wait();
     g_main_loop_unref(loop);
 }
 
@@ -1097,6 +1211,7 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("transact_custom3"), test_transact_custom3);
     g_test_add_func(TEST_("transact_cancel"), test_transact_cancel);
     g_test_add_func(TEST_("transact_cancel2"), test_transact_cancel2);
+    g_test_add_func(TEST_("transact_2way"), test_transact_2way);
     g_test_add_func(TEST_("transact_incoming"), test_transact_incoming);
     g_test_add_func(TEST_("transact_status_reply"), test_transact_status_reply);
     g_test_add_func(TEST_("transact_async"), test_transact_async);

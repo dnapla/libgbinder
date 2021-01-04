@@ -15,8 +15,8 @@
 #
 
 VERSION_MAJOR = 1
-VERSION_MINOR = 0
-VERSION_RELEASE = 41
+VERSION_MINOR = 1
+VERSION_RELEASE = 3
 
 # Version for pkg-config
 PCVERSION = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_RELEASE)
@@ -78,6 +78,7 @@ SRC = \
   gbinder_buffer.c \
   gbinder_cleanup.c \
   gbinder_client.c \
+  gbinder_config.c \
   gbinder_driver.c \
   gbinder_eventloop.c \
   gbinder_io_32.c \
@@ -97,9 +98,10 @@ SRC = \
   gbinder_writer.c
 
 SRC += \
-  gbinder_defaultservicemanager.c \
-  gbinder_hwservicemanager.c \
-  gbinder_servicemanager.c
+  gbinder_servicemanager.c \
+  gbinder_servicemanager_aidl.c \
+  gbinder_servicemanager_aidl2.c \
+  gbinder_servicemanager_hidl.c
 
 SRC += \
   gbinder_system.c
@@ -120,6 +122,7 @@ COVERAGE_BUILD_DIR = $(BUILD_DIR)/coverage
 #
 
 CC ?= $(CROSS_COMPILE)gcc
+STRIP ?= strip
 LD = $(CC)
 WARNINGS = -Wall -Wstrict-aliasing -Wunused-result
 INCLUDES += -I$(INCLUDE_DIR)
@@ -132,10 +135,7 @@ DEBUG_FLAGS = -g
 RELEASE_FLAGS =
 COVERAGE_FLAGS = -g
 
-ifndef KEEP_SYMBOLS
-KEEP_SYMBOLS = 0
-endif
-
+KEEP_SYMBOLS ?= 0
 ifneq ($(KEEP_SYMBOLS),0)
 RELEASE_FLAGS += -g
 endif
@@ -233,6 +233,7 @@ clean:
 	rm -fr debian/tmp debian/libgbinder debian/libgbinder-dev
 	rm -f documentation.list debian/files debian/*.substvars
 	rm -f debian/*.debhelper.log debian/*.debhelper debian/*~
+	rm -f debian/libgbinder.install debian/libgbinder-dev.install
 
 test:
 	make -C unit test
@@ -264,7 +265,7 @@ $(DEBUG_SO): $(DEBUG_OBJS)
 $(RELEASE_SO): $(RELEASE_OBJS)
 	$(LD) $(RELEASE_OBJS) $(RELEASE_LDFLAGS) -o $@
 ifeq ($(KEEP_SYMBOLS),0)
-	strip $@
+	$(STRIP) $@
 endif
 
 $(DEBUG_LIB): $(DEBUG_OBJS)
@@ -291,8 +292,19 @@ $(COVERAGE_LIB): $(COVERAGE_OBJS)
 	$(AR) rc $@ $?
 	ranlib $@
 
+#
+# LIBDIR usually gets substituted with arch specific dir.
+# It's relative in deb build and can be whatever in rpm build.
+#
+
+LIBDIR ?= usr/lib
+ABS_LIBDIR := $(shell echo /$(LIBDIR) | sed -r 's|/+|/|g')
+
 $(PKGCONFIG): $(LIB_NAME).pc.in Makefile
-	sed -e 's/\[version\]/'$(PCVERSION)/g $< > $@
+	sed -e 's|@version@|$(PCVERSION)|g' -e 's|@libdir@|$(ABS_LIBDIR)|g' $< > $@
+
+debian/%.install: debian/%.install.in
+	sed 's|@LIBDIR@|$(LIBDIR)|g' $< > $@
 
 #
 # Install
@@ -304,12 +316,12 @@ INSTALL = install
 INSTALL_DIRS = $(INSTALL) -d
 INSTALL_FILES = $(INSTALL) -m $(INSTALL_PERM)
 
-INSTALL_LIB_DIR = $(DESTDIR)/usr/lib
+INSTALL_LIB_DIR = $(DESTDIR)$(ABS_LIBDIR)
 INSTALL_INCLUDE_DIR = $(DESTDIR)/usr/include/$(NAME)
-INSTALL_PKGCONFIG_DIR = $(DESTDIR)/usr/lib/pkgconfig
+INSTALL_PKGCONFIG_DIR = $(DESTDIR)$(ABS_LIBDIR)/pkgconfig
 
 install: $(INSTALL_LIB_DIR)
-	$(INSTALL_FILES) $(RELEASE_SO) $(INSTALL_LIB_DIR)
+	$(INSTALL) -m 755 $(RELEASE_SO) $(INSTALL_LIB_DIR)
 	ln -sf $(LIB_SO) $(INSTALL_LIB_DIR)/$(LIB_SYMLINK2)
 	ln -sf $(LIB_SYMLINK2) $(INSTALL_LIB_DIR)/$(LIB_SYMLINK1)
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2018-2019 Jolla Ltd.
- * Copyright (C) 2018-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2018-2020 Jolla Ltd.
+ * Copyright (C) 2018-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -79,36 +79,51 @@ typedef struct gbinder_local_object_class {
     /* Need to add some placeholders if this class becomes public */
 } GBinderLocalObjectClass;
 
-GType gbinder_local_object_get_type(void);
+GType gbinder_local_object_get_type(void) GBINDER_INTERNAL;
 #define GBINDER_TYPE_LOCAL_OBJECT (gbinder_local_object_get_type())
 #define GBINDER_LOCAL_OBJECT(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), \
         GBINDER_TYPE_LOCAL_OBJECT, GBinderLocalObject))
+#define GBINDER_LOCAL_OBJECT_CLASS(klass) G_TYPE_CHECK_CLASS_CAST((klass), \
+        GBINDER_TYPE_LOCAL_OBJECT, GBinderLocalObjectClass)
 
 #define gbinder_local_object_dev(obj) (gbinder_driver_dev((obj)->ipc->driver))
 #define gbinder_local_object_io(obj) (gbinder_driver_io((obj)->ipc->driver))
+
+void
+gbinder_local_object_init_base(
+    GBinderLocalObject* self,
+    GBinderIpc* ipc,
+    const char* const* ifaces,
+    GBinderLocalTransactFunc txproc,
+    void* user_data)
+    GBINDER_INTERNAL;
 
 gulong
 gbinder_local_object_add_weak_refs_changed_handler(
     GBinderLocalObject* obj,
     GBinderLocalObjectFunc func,
-    void* user_data);
+    void* user_data)
+    GBINDER_INTERNAL;
 
 gulong
 gbinder_local_object_add_strong_refs_changed_handler(
     GBinderLocalObject* obj,
     GBinderLocalObjectFunc func,
-    void* user_data);
+    void* user_data)
+    GBINDER_INTERNAL;
 
 void
 gbinder_local_object_remove_handler(
     GBinderLocalObject* obj,
-    gulong id);
+    gulong id)
+    GBINDER_INTERNAL;
 
 GBINDER_LOCAL_TRANSACTION_SUPPORT
 gbinder_local_object_can_handle_transaction(
     GBinderLocalObject* self,
     const char* iface,
-    guint code);
+    guint code)
+    GBINDER_INTERNAL;
 
 GBinderLocalReply*
 gbinder_local_object_handle_transaction(
@@ -116,7 +131,8 @@ gbinder_local_object_handle_transaction(
     GBinderRemoteRequest* req,
     guint code,
     guint flags,
-    int* status);
+    int* status)
+    GBINDER_INTERNAL;
 
 GBinderLocalReply*
 gbinder_local_object_handle_looper_transaction(
@@ -124,23 +140,28 @@ gbinder_local_object_handle_looper_transaction(
     GBinderRemoteRequest* req,
     guint code,
     guint flags,
-    int* status);
+    int* status)
+    GBINDER_INTERNAL;
 
 void
 gbinder_local_object_handle_increfs(
-    GBinderLocalObject* obj);
+    GBinderLocalObject* obj)
+    GBINDER_INTERNAL;
 
 void
 gbinder_local_object_handle_decrefs(
-    GBinderLocalObject* obj);
+    GBinderLocalObject* obj)
+    GBINDER_INTERNAL;
 
 void
 gbinder_local_object_handle_acquire(
-    GBinderLocalObject* obj);
+    GBinderLocalObject* obj)
+    GBINDER_INTERNAL;
 
 void
 gbinder_local_object_handle_release(
-    GBinderLocalObject* obj);
+    GBinderLocalObject* obj)
+    GBINDER_INTERNAL;
 
 #endif /* GBINDER_LOCAL_OBJECT_PRIVATE_H */
 

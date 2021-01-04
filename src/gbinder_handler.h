@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2018 Jolla Ltd.
- * Copyright (C) 2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2018-2020 Jolla Ltd.
+ * Copyright (C) 2018-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -13,9 +13,9 @@
  *   2. Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of Jolla Ltd nor the names of its contributors may
- *      be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -36,6 +36,7 @@
 #include "gbinder_types_p.h"
 
 typedef struct gbinder_handler_functions {
+    gboolean (*can_loop)(GBinderHandler* handler);
     GBinderLocalReply* (*transact)(GBinderHandler* handler,
         GBinderLocalObject* obj, GBinderRemoteRequest* req, guint code,
         guint flags, int* status);
@@ -46,6 +47,14 @@ struct gbinder_handler {
 };
 
 /* Inline wrappers */
+
+GBINDER_INLINE_FUNC
+gboolean
+gbinder_handler_can_loop(
+    GBinderHandler* self)
+{
+    return self && self->f->can_loop && self->f->can_loop(self);
+}
 
 GBINDER_INLINE_FUNC
 GBinderLocalReply*
