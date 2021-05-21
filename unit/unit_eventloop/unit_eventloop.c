@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Jolla Ltd.
- * Copyright (C) 2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2020-2021 Jolla Ltd.
+ * Copyright (C) 2020-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -46,6 +46,14 @@ test_unreached_proc(
 {
     g_assert_not_reached();
     return G_SOURCE_CONTINUE;
+}
+
+static
+void
+test_quit_cb(
+    gpointer data)
+{
+    g_main_loop_quit((GMainLoop*)data);
 }
 
 /*==========================================================================*
@@ -214,14 +222,6 @@ test_timeout(
 
 static
 void
-test_quit_cb(
-    gpointer data)
-{
-    g_main_loop_quit((GMainLoop*)data);
-}
-
-static
-void
 test_callback(
     void)
 {
@@ -230,9 +230,33 @@ test_callback(
 
     gbinder_eventloop_set(NULL);
     cb = gbinder_idle_callback_new(test_quit_cb, loop, NULL);
+    g_assert(gbinder_idle_callback_ref(cb) == cb);
+    gbinder_idle_callback_unref(cb);
     gbinder_idle_callback_schedule(cb);
     test_run(&test_opt, loop);
     gbinder_idle_callback_unref(cb);
+    g_main_loop_unref(loop);
+}
+
+/*==========================================================================*
+ * invoke
+ *==========================================================================*/
+
+static
+void
+test_invoke(
+    void)
+{
+    GMainLoop* loop = g_main_loop_new(NULL, FALSE);
+
+    gbinder_eventloop_set(NULL);
+    gbinder_idle_callback_invoke_later(test_quit_cb, loop, NULL);
+    test_run(&test_opt, loop);
+
+    gbinder_eventloop_set(NULL);
+    gbinder_idle_callback_invoke_later(NULL, loop, test_quit_cb);
+    test_run(&test_opt, loop);
+
     g_main_loop_unref(loop);
 }
 
@@ -249,6 +273,7 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("idle"), test_idle);
     g_test_add_func(TEST_("timeout"), test_timeout);
     g_test_add_func(TEST_("callback"), test_callback);
+    g_test_add_func(TEST_("invoke"), test_invoke);
     test_init(&test_opt, argc, argv);
     return g_test_run();
 }
